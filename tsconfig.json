@@ -32,6 +32,7 @@
       "sections/*": ["sections/*"],
       "constants/*": ["constants/*"],
       "models/*": ["models/*"],
+      "queries/*": ["queries/*"],
       "remotes/*": ["remotes/*"],
       "styles/*": ["styles/*"],
       "utils/*": ["utils/*"],
