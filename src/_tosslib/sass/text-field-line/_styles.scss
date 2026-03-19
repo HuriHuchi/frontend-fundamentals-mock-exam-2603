@@ -49,19 +49,16 @@
   left: 0;
   pointer-events: none;
   white-space: nowrap;
-  transition: transform $text-field-line-transition-duration
-      $text-field-line-transition-timing-function,
+  transition: transform $text-field-line-transition-duration $text-field-line-transition-timing-function,
     font-size $text-field-line-transition-duration $text-field-line-transition-timing-function,
     font-weight $text-field-line-transition-duration $text-field-line-transition-timing-function,
     color $text-field-line-transition-duration $text-field-line-transition-timing-function;
 
   transform: translateY(-22px);
   transform: translateY(calc(-1 * var(--toss-font-size-22, 22px)));
-  color:$grey800;
+  color: $grey800;
 
-  .text-field-line:not(.text-field-line--error).text-field-line--has-value
-    .text-field-line__input:focus
-    ~ &,
+  .text-field-line:not(.text-field-line--error).text-field-line--has-value .text-field-line__input:focus ~ &,
   .text-field-line--focused & {
     color: $blue700;
   }
@@ -72,10 +69,7 @@
 
   .text-field-line:not(.text-field-line--has-value) .text-field-line__input ~ & {
     top: calc((0.409 * 22px) / 2 + 22px);
-    top: calc(
-      (var(--toss-line-height-22, 22px) - var(--toss-font-size-22, 22px)) / 2 +
-        var(--toss-font-size-22, 22px)
-    );
+    top: calc((var(--toss-line-height-22, 22px) - var(--toss-font-size-22, 22px)) / 2 + var(--toss-font-size-22, 22px));
     transform: translateY(0);
     font-size: 22px;
     font-size: var(--toss-font-size-22, 22px);
@@ -86,9 +80,7 @@
     line-height: calc(var(--toss-font-size-13) * 2.2);
   }
 
-  .text-field-line.text-field-line--has-value.text-field-line--hide-label
-    .text-field-line__input
-    ~ & {
+  .text-field-line.text-field-line--has-value.text-field-line--hide-label .text-field-line__input ~ & {
     display: none;
   }
 }
@@ -121,7 +113,7 @@
 
   &:disabled {
     color: $grey400;
-    -webkit-text-fill-color:$grey500;
+    -webkit-text-fill-color: $grey500;
     opacity: 1;
   }
 
@@ -159,8 +151,7 @@
   height: 2px;
   border-radius: 1px;
   background-color: $grey100;
-  transition: background-color $text-field-line-transition-duration
-    $text-field-line-transition-timing-function;
+  transition: background-color $text-field-line-transition-duration $text-field-line-transition-timing-function;
 
   .text-field-line--focused & {
     background-color: $blue400;
