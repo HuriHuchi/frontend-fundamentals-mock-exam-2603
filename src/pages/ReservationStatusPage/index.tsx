@@ -1,14 +1,13 @@
 import { css } from '@emotion/react';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Top, Spacing, Border, Button, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { getRooms } from 'pages/remotes';
 import { DatePicker } from 'components/DatePicker';
-import { formatDate } from 'utils/date';
 import { ReservationTimeline } from './components/ReservationTimeline';
 import { MyReservations } from './components/MyReservations';
+import { useDate } from 'hooks/useDate';
 
 const TIME_SLOTS: string[] = [];
 for (let h = 9; h <= 20; h++) {
@@ -20,7 +19,7 @@ for (let h = 9; h <= 20; h++) {
 
 export function ReservationStatusPage() {
   const navigate = useNavigate();
-  const [date, setDate] = useState(formatDate(new Date()));
+  const [date, setDate] = useDate();
 
   const { data: rooms = [] } = useQuery({ queryKey: ['rooms'], queryFn: getRooms });
 
