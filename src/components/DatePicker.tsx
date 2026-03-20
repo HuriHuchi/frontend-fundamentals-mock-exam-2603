@@ -1,13 +1,15 @@
 import { css } from '@emotion/react';
 import { colors } from '_tosslib/constants/colors';
 import { formatDate } from 'utils/date';
+import { Text } from '_tosslib/components';
 
 interface DatePickerProps {
   date: string;
   setDate: (date: string) => void;
+  label?: string;
 }
 
-export function DatePicker({ date, setDate }: DatePickerProps) {
+export function DatePicker({ date, setDate, label }: DatePickerProps) {
   return (
     <div
       css={css`
@@ -16,6 +18,11 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
         gap: 6px;
       `}
     >
+      {label && (
+        <Text typography="t7" fontWeight="medium" color={colors.grey600}>
+          {label}
+        </Text>
+      )}
       <input
         type="date"
         value={date}

@@ -6,6 +6,8 @@ import { Top, Spacing, Border, Button, Text, Select, ListRow } from '_tosslib/co
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, createReservation } from 'pages/remotes';
 import axios from 'axios';
+import { DatePicker } from 'components/DatePicker';
+import { useFilters } from './filters';
 
 const EQUIPMENT_LABELS: Record<string, string> = {
   tv: 'TV',
@@ -24,42 +26,21 @@ for (let h = 9; h <= 20; h++) {
   }
 }
 
-function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
 export function RoomBookingPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [date, setDate] = useState(searchParams.get('date') || formatDate(new Date()));
-  const [startTime, setStartTime] = useState(searchParams.get('startTime') || '');
-  const [endTime, setEndTime] = useState(searchParams.get('endTime') || '');
-  const [attendees, setAttendees] = useState(Number(searchParams.get('attendees')) || 1);
-  const [equipment, setEquipment] = useState<string[]>(
-    searchParams.get('equipment') ? searchParams.get('equipment')!.split(',').filter(Boolean) : []
-  );
-  const [preferredFloor, setPreferredFloor] = useState<number | null>(
-    searchParams.get('floor') ? Number(searchParams.get('floor')) : null
-  );
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // URL 쿼리 파라미터 동기화
-  useEffect(() => {
-    const params: Record<string, string> = {};
-    if (date) params.date = date;
-    if (startTime) params.startTime = startTime;
-    if (endTime) params.endTime = endTime;
-    if (attendees > 1) params.attendees = String(attendees);
-    if (equipment.length > 0) params.equipment = equipment.join(',');
-    if (preferredFloor !== null) params.floor = String(preferredFloor);
-    setSearchParams(params, { replace: true });
-  }, [date, startTime, endTime, attendees, equipment, preferredFloor, setSearchParams]);
+  const [filters, setFilters] = useFilters({
+    onFilterChange: () => {
+      setSelectedRoomId(null);
+      setErrorMessage(null);
+    },
+  });
+
+  const { date, startTime, endTime, attendees, equipment, floor: preferredFloor } = filters;
 
   const { data: rooms = [] } = useQuery(['rooms'], getRooms);
   const { data: reservations = [] } = useQuery(['reservations', date], () => getReservations(date), {
@@ -76,12 +57,6 @@ export function RoomBookingPage() {
       },
     }
   );
-
-  // 필터 변경 시 선택 초기화
-  const handleFilterChange = () => {
-    setSelectedRoomId(null);
-    setErrorMessage(null);
-  };
 
   // 입력 검증
   let validationError: string | null = null;
@@ -234,45 +209,7 @@ export function RoomBookingPage() {
         <Spacing size={16} />
 
         {/* 날짜 */}
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-          `}
-        >
-          <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
-            날짜
-          </Text>
-          <input
-            type="date"
-            value={date}
-            min={formatDate(new Date())}
-            onChange={e => {
-              setDate(e.target.value);
-              handleFilterChange();
-            }}
-            aria-label="날짜"
-            css={css`
-              box-sizing: border-box;
-              font-size: 16px;
-              font-weight: 500;
-              line-height: 1.5;
-              height: 48px;
-              background-color: ${colors.grey50};
-              border-radius: 12px;
-              color: ${colors.grey800};
-              width: 100%;
-              border: 1px solid ${colors.grey200};
-              padding: 0 16px;
-              outline: none;
-              transition: border-color 0.15s;
-              &:focus {
-                border-color: ${colors.blue500};
-              }
-            `}
-          />
-        </div>
+        <DatePicker date={date} setDate={date => setFilters({ date })} label="날짜" />
         <Spacing size={14} />
 
         {/* 시간 */}
@@ -296,8 +233,7 @@ export function RoomBookingPage() {
             <Select
               value={startTime}
               onChange={e => {
-                setStartTime(e.target.value);
-                handleFilterChange();
+                setFilters({ startTime: e.target.value });
               }}
               aria-label="시작 시간"
             >
@@ -323,8 +259,7 @@ export function RoomBookingPage() {
             <Select
               value={endTime}
               onChange={e => {
-                setEndTime(e.target.value);
-                handleFilterChange();
+                setFilters({ endTime: e.target.value });
               }}
               aria-label="종료 시간"
             >
@@ -362,8 +297,7 @@ export function RoomBookingPage() {
               min={1}
               value={attendees}
               onChange={e => {
-                setAttendees(Math.max(1, Number(e.target.value)));
-                handleFilterChange();
+                setFilters({ attendees: Math.max(1, Number(e.target.value)) });
               }}
               aria-label="참석 인원"
               css={css`
@@ -401,8 +335,7 @@ export function RoomBookingPage() {
               value={preferredFloor ?? ''}
               onChange={e => {
                 const val = e.target.value;
-                setPreferredFloor(val === '' ? null : Number(val));
-                handleFilterChange();
+                setFilters({ floor: val === '' ? null : Number(val) });
               }}
               aria-label="선호 층"
             >
@@ -438,8 +371,7 @@ export function RoomBookingPage() {
                   type="button"
                   onClick={() => {
                     const next = selected ? equipment.filter(e => e !== eq) : [...equipment, eq];
-                    setEquipment(next);
-                    handleFilterChange();
+                    setFilters({ equipment: next });
                   }}
                   aria-label={EQUIPMENT_LABELS[eq]}
                   aria-pressed={selected}
