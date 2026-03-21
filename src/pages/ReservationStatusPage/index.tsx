@@ -53,7 +53,7 @@ export function ReservationStatusPage() {
       <Spacing size={24} />
 
       {/* 회의실 예약 현황 */}
-      <ReservationTimeline rooms={rooms} date={date} />
+      <ReservationTimeline rooms={rooms} selectedDate={date} />
 
       <Spacing size={24} />
       <Border size={8} />

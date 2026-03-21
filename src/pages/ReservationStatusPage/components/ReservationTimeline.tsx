@@ -22,11 +22,11 @@ function timeToMinutes(time: string): number {
 
 interface ReservationTimelineProps {
   rooms: Room[];
-  date: string;
+  selectedDate: string;
 }
 
-export function ReservationTimeline({ rooms, date }: ReservationTimelineProps) {
-  const { data: reservations = [] } = useQuery(reservationQueries.list(date));
+export function ReservationTimeline({ rooms, selectedDate }: ReservationTimelineProps) {
+  const { data: reservations = [] } = useQuery(reservationQueries.list(selectedDate));
 
   const [activeReservation, setActiveReservation] = useState<string | null>(null);
 
@@ -94,8 +94,8 @@ export function ReservationTimeline({ rooms, date }: ReservationTimelineProps) {
         </div>
 
         {/* 회의실별 타임라인 */}
-        {rooms.map((room: { id: string; name: string }, index: number) => {
-          const roomReservations = reservations.filter((r: { roomId: string }) => r.roomId === room.id);
+        {rooms.map((room, index) => {
+          const roomReservations = reservations.filter(r => r.roomId === room.id);
           return (
             <div
               key={room.id}
@@ -135,7 +135,7 @@ export function ReservationTimeline({ rooms, date }: ReservationTimelineProps) {
                   overflow: visible;
                 `}
               >
-                {roomReservations.map((res: Reservation) => {
+                {roomReservations.map(res => {
                   const left = (timeToMinutes(res.start) / TOTAL_MINUTES) * 100;
                   const width = ((timeToMinutes(res.end) - timeToMinutes(res.start)) / TOTAL_MINUTES) * 100;
                   const isActive = activeReservation === res.id;

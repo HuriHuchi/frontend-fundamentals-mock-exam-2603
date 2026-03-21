@@ -13,21 +13,34 @@ interface MyReservationsProps {
   getRoomName: (roomId: string) => string;
 }
 
+function useMessage() {
+  const location = useLocation();
+  const locationState = location.state as { message?: string } | null;
+
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
+    locationState?.message ? { type: 'success', text: locationState.message } : null
+  );
+
+  useEffect(() => {
+    if (locationState?.message) {
+      window.history.replaceState({}, '');
+    }
+  }, [locationState]);
+
+  return [message, setMessage] as const;
+}
+
 export function MyReservations({ getRoomName }: MyReservationsProps) {
   const { data: myReservationList = [] } = useQuery(reservationQueries.myReservations());
-  const location = useLocation();
-  const queryClient = useQueryClient();
 
-  const cancelMutation = useMutation((id: string) => cancelReservation(id), {
+  const [message, setMessage] = useMessage();
+
+  const queryClient = useQueryClient();
+  const cancelMutation = useMutation(cancelReservation, {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: reservationQueries.keys.all() });
     },
   });
-
-  const locationState = location.state as { message?: string } | null;
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
-    locationState?.message ? { type: 'success', text: locationState.message } : null
-  );
 
   const handleCancel = async (id: string) => {
     try {
@@ -37,12 +50,6 @@ export function MyReservations({ getRoomName }: MyReservationsProps) {
       setMessage({ type: 'error', text: '취소에 실패했습니다.' });
     }
   };
-
-  useEffect(() => {
-    if (locationState?.message) {
-      window.history.replaceState({}, '');
-    }
-  }, [locationState]);
 
   return (
     <>
