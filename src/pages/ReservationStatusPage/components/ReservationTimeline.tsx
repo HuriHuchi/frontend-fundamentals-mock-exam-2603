@@ -2,23 +2,13 @@ import { css } from '@emotion/react';
 import { useQuery } from '@tanstack/react-query';
 import { Spacing, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
+import { Reservation, Room } from '_tosslib/server/types';
+import { EQUIPMENT_LABELS } from 'pages/const';
 import { reservationQueries } from 'queries/reservation';
 import { useState } from 'react';
+import { getTimeSlots } from 'utils/time';
 
-const EQUIPMENT_LABELS: Record<string, string> = {
-  tv: 'TV',
-  whiteboard: '화이트보드',
-  video: '화상장비',
-  speaker: '스피커',
-};
-
-const TIME_SLOTS: string[] = [];
-for (let h = 9; h <= 20; h++) {
-  TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`);
-  if (h < 20) {
-    TIME_SLOTS.push(`${String(h).padStart(2, '0')}:30`);
-  }
-}
+const TIME_SLOTS = getTimeSlots();
 
 const HOUR_LABELS = TIME_SLOTS.filter(t => t.endsWith(':00'));
 const TIMELINE_START = 9;
@@ -31,7 +21,7 @@ function timeToMinutes(time: string): number {
 }
 
 interface ReservationTimelineProps {
-  rooms: { id: string; name: string; floor: number; capacity: number; equipment: string[] }[];
+  rooms: Room[];
   date: string;
 }
 
@@ -145,71 +135,69 @@ export function ReservationTimeline({ rooms, date }: ReservationTimelineProps) {
                   overflow: visible;
                 `}
               >
-                {roomReservations.map(
-                  (res: { id: string; start: string; end: string; attendees: number; equipment: string[] }) => {
-                    const left = (timeToMinutes(res.start) / TOTAL_MINUTES) * 100;
-                    const width = ((timeToMinutes(res.end) - timeToMinutes(res.start)) / TOTAL_MINUTES) * 100;
-                    const isActive = activeReservation === res.id;
-                    return (
+                {roomReservations.map((res: Reservation) => {
+                  const left = (timeToMinutes(res.start) / TOTAL_MINUTES) * 100;
+                  const width = ((timeToMinutes(res.end) - timeToMinutes(res.start)) / TOTAL_MINUTES) * 100;
+                  const isActive = activeReservation === res.id;
+                  return (
+                    <div
+                      key={res.id}
+                      css={css`
+                        position: absolute;
+                        left: ${left}%;
+                        width: ${width}%;
+                        height: 100%;
+                      `}
+                    >
                       <div
-                        key={res.id}
+                        role="button"
+                        aria-label={`${room.name} ${res.start}-${res.end} 예약 상세`}
+                        onClick={() => setActiveReservation(isActive ? null : res.id)}
                         css={css`
-                          position: absolute;
-                          left: ${left}%;
-                          width: ${width}%;
+                          width: 100%;
                           height: 100%;
+                          background: ${colors.blue400};
+                          border-radius: 4px;
+                          opacity: ${isActive ? 1 : 0.75};
+                          cursor: pointer;
+                          transition: opacity 0.15s;
+                          &:hover {
+                            opacity: 1;
+                          }
                         `}
-                      >
+                      />
+                      {isActive && (
                         <div
-                          role="button"
-                          aria-label={`${room.name} ${res.start}-${res.end} 예약 상세`}
-                          onClick={() => setActiveReservation(isActive ? null : res.id)}
+                          role="tooltip"
                           css={css`
-                            width: 100%;
-                            height: 100%;
-                            background: ${colors.blue400};
-                            border-radius: 4px;
-                            opacity: ${isActive ? 1 : 0.75};
-                            cursor: pointer;
-                            transition: opacity 0.15s;
-                            &:hover {
-                              opacity: 1;
-                            }
+                            position: absolute;
+                            top: 100%;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            margin-top: 6px;
+                            background: ${colors.grey900};
+                            color: ${colors.white};
+                            padding: 8px 12px;
+                            border-radius: 8px;
+                            font-size: 12px;
+                            white-space: nowrap;
+                            z-index: 10;
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+                            line-height: 1.6;
                           `}
-                        />
-                        {isActive && (
-                          <div
-                            role="tooltip"
-                            css={css`
-                              position: absolute;
-                              top: 100%;
-                              left: 50%;
-                              transform: translateX(-50%);
-                              margin-top: 6px;
-                              background: ${colors.grey900};
-                              color: ${colors.white};
-                              padding: 8px 12px;
-                              border-radius: 8px;
-                              font-size: 12px;
-                              white-space: nowrap;
-                              z-index: 10;
-                              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-                              line-height: 1.6;
-                            `}
-                          >
-                            <div>
-                              {res.start} ~ {res.end}
-                            </div>
-                            <div>{res.attendees}명</div>
-                            {res.equipment.length > 0 && (
-                              <div>{res.equipment.map((e: string) => EQUIPMENT_LABELS[e]).join(', ')}</div>
-                            )}
+                        >
+                          <div>
+                            {res.start} ~ {res.end}
                           </div>
-                        )}
-                      </div>
-                    );
-                  }
-                )}
+                          <div>{res.attendees}명</div>
+                          {res.equipment.length > 0 && (
+                            <div>{res.equipment.map(e => EQUIPMENT_LABELS[e]).join(', ')}</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );

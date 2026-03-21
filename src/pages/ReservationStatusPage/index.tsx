@@ -3,28 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Top, Spacing, Border, Button, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { getRooms } from 'pages/remotes';
 import { DatePicker } from 'components/DatePicker';
 import { ReservationTimeline } from './components/ReservationTimeline';
 import { MyReservations } from './components/MyReservations';
 import { useDate } from 'hooks/useDate';
-
-const TIME_SLOTS: string[] = [];
-for (let h = 9; h <= 20; h++) {
-  TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`);
-  if (h < 20) {
-    TIME_SLOTS.push(`${String(h).padStart(2, '0')}:30`);
-  }
-}
+import { roomsQueries } from 'queries/rooms';
 
 export function ReservationStatusPage() {
   const navigate = useNavigate();
   const [date, setDate] = useDate();
 
-  const { data: rooms = [] } = useQuery({ queryKey: ['rooms'], queryFn: getRooms });
+  const { data: rooms = [] } = useQuery(roomsQueries.getRooms());
 
-  const getRoomName = (roomId: string) =>
-    rooms.find((r: { id: string; name: string }) => r.id === roomId)?.name ?? roomId;
+  const getRoomName = (roomId: string) => rooms.find(r => r.id === roomId)?.name ?? roomId;
 
   return (
     <div
