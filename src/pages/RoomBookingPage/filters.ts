@@ -2,7 +2,7 @@ import { Equipment } from '_tosslib/server/types';
 import { useSearchParams } from 'react-router-dom';
 import { formatDate } from 'utils/date';
 
-type Filters = {
+export type Filters = {
   date: string;
   startTime: string;
   endTime: string;
@@ -56,3 +56,20 @@ export function useFilters({ onFilterChange }: Params) {
 
   return [filters, setFilter] as const;
 }
+
+export const validateFilters = (filters: Filters) => {
+  const { startTime, endTime, attendees } = filters;
+
+  const hasTimeInputs = startTime !== '' && endTime !== '';
+  let validationError: string | null = null;
+
+  if (hasTimeInputs) {
+    if (endTime <= startTime) {
+      validationError = '종료 시간은 시작 시간보다 늦어야 합니다.';
+    } else if (attendees < 1) {
+      validationError = '참석 인원은 1명 이상이어야 합니다.';
+    }
+  }
+
+  return { error: validationError };
+};

@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import { useQuery } from '@tanstack/react-query';
 import { Spacing, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { Reservation, Room } from '_tosslib/server/types';
+import { Room } from '_tosslib/server/types';
 import { EQUIPMENT_LABELS } from 'pages/const';
 import { reservationQueries } from 'queries/reservation';
 import { useState } from 'react';
