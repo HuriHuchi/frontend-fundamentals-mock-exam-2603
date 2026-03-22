@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
-import { QueryErrorResetBoundary, useQuery } from '@tanstack/react-query';
+import { QueryErrorResetBoundary, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Top, Spacing, Border, Button, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { DatePicker } from 'components/DatePicker';
@@ -14,11 +14,24 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from 'components/ErrorFallback';
 
 export function ReservationStatusPage() {
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary FallbackComponent={ErrorFallback} onReset={reset}>
+          <Suspense fallback={<Loader />}>
+            <ReservationStatusPageRoot />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  );
+}
+
+function ReservationStatusPageRoot() {
   const navigate = useNavigate();
   const [date, setDate] = useDate();
 
-  // todo: 로딩 및 에러 처리 어떻게 할 것인가
-  const { data: rooms = [] } = useQuery(roomsQueries.getRooms());
+  const { data: rooms } = useSuspenseQuery(roomsQueries.getRooms());
 
   const getRoomName = (roomId: string) => rooms.find(r => r.id === roomId)?.name ?? roomId;
 

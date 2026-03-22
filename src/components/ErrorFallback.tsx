@@ -10,7 +10,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
     <div
       role="alert"
       css={css`
-        padding: 0 24px;
+        padding: 24px;
       `}
     >
       <div

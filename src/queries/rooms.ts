@@ -2,10 +2,10 @@ import { queryOptions } from '@tanstack/react-query';
 import { getRooms } from 'pages/remotes';
 
 export const roomsQueries = {
-  rooms: () => ['rooms'],
+  rooms: () => ['rooms'] as const,
   getRooms: () =>
     queryOptions({
       queryKey: roomsQueries.rooms(),
-      queryFn: getRooms,
+      queryFn: () => getRooms(),
     }),
 };
