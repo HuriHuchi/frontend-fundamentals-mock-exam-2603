@@ -5,10 +5,10 @@ import { colors } from '_tosslib/constants/colors';
 interface Props {
   value: number | null;
   onChange: (value: number | null) => void;
-  children: React.ReactNode;
+  options: number[];
 }
 
-export function FloorSelect({ value, children, onChange }: Props) {
+export function FloorSelect({ value, options, onChange }: Props) {
   return (
     <div
       css={css`
@@ -30,16 +30,12 @@ export function FloorSelect({ value, children, onChange }: Props) {
         aria-label="선호 층"
       >
         <option value="">전체</option>
-        {children}
+        {options.map(floor => (
+          <option key={floor} value={floor}>
+            {floor}층
+          </option>
+        ))}
       </Select>
     </div>
-  );
-}
-
-export function FloorSelectOption({ floor }: { floor: number }) {
-  return (
-    <option key={floor} value={floor}>
-      {floor}층
-    </option>
   );
 }

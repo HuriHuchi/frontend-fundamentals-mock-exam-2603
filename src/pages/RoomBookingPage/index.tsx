@@ -20,7 +20,6 @@ import {
   TimeSelect,
   AvailableRoomsSection,
   FloorSelect,
-  FloorSelectOption,
 } from './components';
 import { Reservation, Room } from '_tosslib/server/types';
 
@@ -97,13 +96,12 @@ export function RoomBookingPage() {
         equipment,
       });
 
-      if ('ok' in result && result.ok) {
+      if (result.ok) {
         navigate('/', { state: { message: '예약이 완료되었습니다!' } });
         return;
       }
 
-      const errResult = result as { message?: string };
-      setErrorMessage(errResult.message ?? '예약에 실패했습니다.');
+      setErrorMessage(result.message ?? '예약에 실패했습니다.');
       setSelectedRoomId(null);
     } catch (err: unknown) {
       let serverMessage = '예약에 실패했습니다.';
@@ -184,11 +182,7 @@ export function RoomBookingPage() {
           `}
         >
           <AttendeesInput label="참석 인원" value={attendees} onChange={attendees => setFilters({ attendees })} />
-          <FloorSelect value={preferredFloor} onChange={floor => setFilters({ floor })}>
-            {floors.map(floor => (
-              <FloorSelectOption key={floor} floor={floor} />
-            ))}
-          </FloorSelect>
+          <FloorSelect value={preferredFloor} options={floors} onChange={floor => setFilters({ floor })} />
         </div>
         <Spacing size={14} />
 
