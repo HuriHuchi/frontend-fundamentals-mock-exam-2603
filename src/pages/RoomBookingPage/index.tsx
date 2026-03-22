@@ -1,11 +1,12 @@
 import { css } from '@emotion/react';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSuspenseQuery, useMutation, useQueryClient, QueryErrorResetBoundary } from '@tanstack/react-query';
 import { Top, Spacing, Border, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { createReservation } from 'pages/remotes';
 import axios from 'axios';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useFilters, validateFilters } from './filters';
 import { roomsQueries } from 'queries/rooms';
 import { reservationQueries } from 'queries/reservation';
@@ -22,10 +23,26 @@ import {
   FloorSelect,
 } from './components';
 import { Reservation, Room } from '_tosslib/server/types';
+import { Loader } from 'components/Loader';
+import { ErrorFallback } from 'components/ErrorFallback';
 
 const TIME_SLOTS = getTimeSlots();
 
 export function RoomBookingPage() {
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary FallbackComponent={ErrorFallback} onReset={reset}>
+          <Suspense fallback={<Loader />}>
+            <RoomBookingPageRoot />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  );
+}
+
+function RoomBookingPageRoot() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -41,8 +58,8 @@ export function RoomBookingPage() {
 
   const { date, startTime, endTime, attendees, equipment, floor: preferredFloor } = filters;
 
-  const { data: rooms = [] } = useQuery(roomsQueries.getRooms());
-  const { data: reservations = [] } = useQuery(reservationQueries.list(date));
+  const { data: rooms = [] } = useSuspenseQuery(roomsQueries.getRooms());
+  const { data: reservations = [] } = useSuspenseQuery(reservationQueries.list(date));
 
   const createMutation = useMutation((data: Omit<Reservation, 'id'>) => createReservation(data), {
     onSuccess: () => {
@@ -51,7 +68,8 @@ export function RoomBookingPage() {
   });
 
   const { error: validationError } = validateFilters(filters);
-  const isFilterComplete = !validationError;
+  const hasRequiredFilters = startTime !== '' && endTime !== '';
+  const isFilterComplete = hasRequiredFilters && !validationError;
 
   const conditions: Array<(room: Room) => boolean> = [
     room => room.capacity >= attendees,

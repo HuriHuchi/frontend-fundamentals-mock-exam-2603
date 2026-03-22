@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Spacing, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { Room } from '_tosslib/server/types';
@@ -26,7 +26,7 @@ interface ReservationTimelineProps {
 }
 
 export function ReservationTimeline({ rooms, selectedDate }: ReservationTimelineProps) {
-  const { data: reservations = [] } = useQuery(reservationQueries.list(selectedDate));
+  const { data: reservations } = useSuspenseQuery(reservationQueries.list(selectedDate));
 
   const [activeReservation, setActiveReservation] = useState<string | null>(null);
 

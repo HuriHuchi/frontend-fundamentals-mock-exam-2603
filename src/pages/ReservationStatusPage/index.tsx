@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { QueryErrorResetBoundary, useQuery } from '@tanstack/react-query';
 import { Top, Spacing, Border, Button, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { DatePicker } from 'components/DatePicker';
@@ -8,11 +8,16 @@ import { ReservationTimeline } from './components/ReservationTimeline';
 import { MyReservations } from './components/MyReservations';
 import { useDate } from 'hooks/useDate';
 import { roomsQueries } from 'queries/rooms';
+import { Loader } from 'components/Loader';
+import { Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorFallback } from 'components/ErrorFallback';
 
 export function ReservationStatusPage() {
   const navigate = useNavigate();
   const [date, setDate] = useDate();
 
+  // todo: 로딩 및 에러 처리 어떻게 할 것인가
   const { data: rooms = [] } = useQuery(roomsQueries.getRooms());
 
   const getRoomName = (roomId: string) => rooms.find(r => r.id === roomId)?.name ?? roomId;
@@ -53,14 +58,30 @@ export function ReservationStatusPage() {
       <Spacing size={24} />
 
       {/* 회의실 예약 현황 */}
-      <ReservationTimeline rooms={rooms} selectedDate={date} />
+      <QueryErrorResetBoundary>
+        {({ reset }) => (
+          <ErrorBoundary FallbackComponent={ErrorFallback} onReset={reset} resetKeys={[date]}>
+            <Suspense fallback={<Loader />}>
+              <ReservationTimeline rooms={rooms} selectedDate={date} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+      </QueryErrorResetBoundary>
 
       <Spacing size={24} />
       <Border size={8} />
       <Spacing size={24} />
 
       {/* 내 예약 목록 */}
-      <MyReservations getRoomName={getRoomName} />
+      <QueryErrorResetBoundary>
+        {({ reset }) => (
+          <ErrorBoundary FallbackComponent={ErrorFallback} onReset={reset}>
+            <Suspense fallback={<Loader />}>
+              <MyReservations getRoomName={getRoomName} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+      </QueryErrorResetBoundary>
 
       <Spacing size={24} />
       <Border size={8} />

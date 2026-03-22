@@ -4,8 +4,8 @@ import { getMyReservations, getReservations } from 'pages/remotes';
 export const reservationQueries = {
   keys: {
     all: () => ['reservations'],
-    list: (date: string) => [reservationQueries.keys.all(), date],
-    myReservations: () => [reservationQueries.keys.all(), 'myReservations'],
+    list: (date: string) => [...reservationQueries.keys.all(), date],
+    myReservations: () => [...reservationQueries.keys.all(), 'myReservations'],
   },
   list: (date: string) =>
     queryOptions({

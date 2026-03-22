@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Button, ListRow, Spacing, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { reservationQueries } from 'queries/reservation';
@@ -14,7 +14,7 @@ interface MyReservationsProps {
 }
 
 export function MyReservations({ getRoomName }: MyReservationsProps) {
-  const { data: myReservationList = [] } = useQuery(reservationQueries.myReservations());
+  const { data: myReservationList } = useSuspenseQuery(reservationQueries.myReservations());
 
   const [message, setMessage] = useMessage();
 
